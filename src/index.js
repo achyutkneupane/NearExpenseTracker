@@ -73,7 +73,6 @@ function signedOutFlow() {
 
 // Displaying the signed in flow container and fill in account-specific data
 function signedInFlow() {
-  console.log("signed In");
   document.querySelector('#signed-in-flow').style.display = 'block'
 
   document.querySelectorAll('[data-behavior=account-id]').forEach(el => {
@@ -86,8 +85,8 @@ function signedInFlow() {
 
 // update global currentGreeting variable; update DOM with it
 async function fetchTrans() {
-  console.log(contract);
-  allTransactions = await contract.getTransactions({ accountId: window.accountId })
+  allTransactions = await contract.getTransactions({ user: window.accountId });
+  console.log(allTransactions);
   // document.querySelectorAll('[data-behavior=expense_tracker]').forEach(el => {
   //   // set divs, spans, etc
   //   el.innerText = currentGreeting
