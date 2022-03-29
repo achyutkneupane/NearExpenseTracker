@@ -17326,7 +17326,7 @@ __exportStar(require("./browser-connect"), exports);
 require("error-polyfill");
 
 },{"./key_stores/browser-index":"../node_modules/near-api-js/lib/key_stores/browser-index.js","./common-index":"../node_modules/near-api-js/lib/common-index.js","./browser-connect":"../node_modules/near-api-js/lib/browser-connect.js","error-polyfill":"../node_modules/error-polyfill/index.js"}],"config.js":[function(require,module,exports) {
-var CONTRACT_NAME = "dev-1648472931291-53206068310248" || 'NearExpenseTracker';
+var CONTRACT_NAME = "dev-1648472931291-53206068310248" || 'nearexpensetracker.achyut.testnet';
 
 function getConfig(env) {
   switch (env) {
@@ -17445,9 +17445,9 @@ function _initContract() {
             _context.next = 7;
             return new _nearApiJs.Contract(window.walletConnection.account(), nearConfig.contractName, {
               // View methods are read only. They don't modify the state, but usually return some value.
-              viewMethods: ['getGreeting'],
+              viewMethods: ['getTransactions'],
               // Change methods can modify the state. But you don't receive the returned value when called.
-              changeMethods: ['setGreeting']
+              changeMethods: ['addTransaction']
             });
 
           case 7:
@@ -17550,7 +17550,6 @@ function signedOutFlow() {
 
 
 function signedInFlow() {
-  console.log("signed In");
   document.querySelector('#signed-in-flow').style.display = 'block';
   document.querySelectorAll('[data-behavior=account-id]').forEach(function (el) {
     el.innerText = window.accountId;
@@ -17570,14 +17569,19 @@ function _fetchTrans() {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
-            console.log(contract);
-            _context.next = 3;
+            _context.next = 2;
             return contract.getTransactions({
-              accountId: window.accountId
+              user: window.accountId
             });
 
-          case 3:
+          case 2:
             allTransactions = _context.sent;
+            console.log(allTransactions); // document.querySelectorAll('[data-behavior=expense_tracker]').forEach(el => {
+            //   // set divs, spans, etc
+            //   el.innerText = currentGreeting
+            //   // set input elements
+            //   el.value = currentGreeting
+            // })
 
           case 4:
           case "end":
@@ -17620,7 +17624,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "50453" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "52598" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
