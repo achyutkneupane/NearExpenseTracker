@@ -17576,14 +17576,8 @@ function _fetchTrans() {
 
           case 2:
             allTransactions = _context.sent;
-            console.log(allTransactions); // document.querySelectorAll('[data-behavior=expense_tracker]').forEach(el => {
-            //   // set divs, spans, etc
-            //   el.innerText = currentGreeting
-            //   // set input elements
-            //   el.value = currentGreeting
-            // })
 
-          case 4:
+          case 3:
           case "end":
             return _context.stop();
         }
@@ -17624,7 +17618,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "52598" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "56830" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
