@@ -1,49 +1,146 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" href="./assets/favicon.ico" />
-  <link rel="apple-touch-icon" href="./assets/favicon.ico" />
-  <title>Welcome to NEAR</title>
-  <link rel="stylesheet" href="global.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEAR Expense Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/flowbite@1.4.1/dist/flowbite.min.css" />
 </head>
+
 <body>
-  <main id="signed-out-flow" style="display: none">
-    <h1>Welcome to NEAR!</h1>
-    <p>
-      To make use of the NEAR blockchain, you need to sign in. The button
-      below will sign you in using NEAR Wallet.
-    </p>
-    <p>
-      By default, when your app runs in "development" mode, it connects
-      to a test network ("testnet") wallet. This works just like the main
-      network ("mainnet") wallet, but the NEAR Tokens on testnet aren't
-      convertible to other currencies – they're just for testing!
-    </p>
-    <p>
-      Go ahead and click the button below to try it out:
-    </p>
-    <p style="text-align: center; margin-top: 2.5em">
-      <button id="sign-in-button">Sign in</button>
-    </p>
-  </main>
-
-  <div id="signed-in-flow" style="display: none">
-    <button class="link" style="float: right" id="sign-out-button">
-      Sign out
-    </button>
-    <main>
-      <h1>
-        <label
-        >
-        Transactions for 
-        </label>
-        <span data-behavior="account-id"></span>
-      </h1>
-    </main>
-      
-
-  <script src="./index.js"></script>
+    <div id="signed-out-flow" style="display: none">
+        <main class="w-screen h-screen flex flex-col justify-center items-center ">
+            <div class="text-center">
+                <h1 class="text-4xl mb-4">
+                    NEAR Expense Tracker
+                </h1>
+                <div class="flex gap-2 justify-center items-center">
+                    <button id="sign-in-button" type="button"
+                        class="text-white bg-[#050708] hover:bg-[#050708]/90 focus:ring-4 focus:outline-none focus:ring-[#050708]/50 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:focus:ring-[#050708]/50 dark:hover:bg-[#050708]/30 mr-2 mb-2 h-12">
+                        <img src="./assets/logo-white.svg" class="w-6">
+                        Sign in with NEAR
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+    <div id="signed-in-flow" style="display: none">
+        <main class="w-screen h-screen">
+            <div class="pt-24 pb-8 text-center">
+                <h1 class="text-4xl mb-4">
+                    Transactions for <span data-behavior="account-id" class="font-bolder text-blue-900"></span>
+                </h1>
+                <div class="flex gap-2 justify-center items-center">
+                    <button id="sign-out-button" type="button"
+                        class="text-white bg-[#050708] hover:bg-[#050708]/90 focus:ring-4 focus:outline-none focus:ring-[#050708]/50 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:focus:ring-[#050708]/50 dark:hover:bg-[#050708]/30 mr-2 mb-2 h-12">
+                        <img src="./assets/logo-white.svg" class="w-6">
+                        Sign Out
+                    </button>
+                    <button type="button" id="show-form"
+                        class="text-white bg-[#050708] hover:bg-[#050708]/90 focus:ring-4 focus:outline-none focus:ring-[#050708]/50 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:focus:ring-[#050708]/50 dark:hover:bg-[#050708]/30 mr-2 mb-2 h-12">
+                        Add Transaction
+                    </button>
+                    <button type="button" id="cancel-form" style="display: none"
+                        class="text-white bg-[#050708] hover:bg-[#050708]/90 focus:ring-4 focus:outline-none focus:ring-[#050708]/50 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:focus:ring-[#050708]/50 dark:hover:bg-[#050708]/30 mr-2 mb-2 h-12">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+            <div class="w-full flex flex-col items-center" data-behavior="addTransForm" style="display: none;">
+                <div class="w-1/3 mb-8 flex flex-col gap-4">
+                    <div class="w-full">
+                        <label for="date"
+                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">Date</label>
+                        <div class="relative">
+                            <div class="flex absolute inset-y-0 left-0 items-center pl-3 pointer-events-none">
+                                <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="currentColor"
+                                    viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd"
+                                        d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                                        clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <input type="text" id="dateTime"
+                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 pl-10"
+                                placeholder="Enter Date" required>
+                        </div>
+                    </div>
+                    <div class="w-full">
+                        <label for="amount"
+                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">Amount</label>
+                        <input type="text" id="amount"
+                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                            placeholder="Enter Amount" required>
+                    </div>
+                    <div class="w-full">
+                        <label for="type"
+                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">Type</label>
+                        <select id="type"
+                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                            <option value="Expense">Expense</option>
+                            <option value="Income">Income</option>
+                        </select>
+                    </div>
+                    <div class="w-full">
+                        <label for="description"
+                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">Description</label>
+                        <input type="text" id="description"
+                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                            placeholder="Enter Description" required>
+                    </div>
+                    <div class="w-full">
+                        <label for="donation"
+                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">Donate (optional)</label>
+                        <input type="text" id="donation"
+                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                            placeholder="Enter Donation Amount (in NEAR)" required>
+                    </div>
+                    <div class="w-full text-center">
+                        <span class="text-red-800 font-bold" data-behavior="form-error"></span>
+                    </div>
+                    <div class="w-full flex justify-center">
+                        <button type="button" id="add-transaction"
+                            class="text-white bg-[#050708] hover:bg-[#050708]/90 focus:ring-4 focus:outline-none focus:ring-[#050708]/50 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:focus:ring-[#050708]/50 dark:hover:bg-[#050708]/30 mr-2 mb-2 h-12">
+                            + Add
+                        </button>
+                        <button type="button" id="waitingButton" style="display: none"
+                            class="text-white hover:text-black bg-gray-700 hover:bg-gray-400 focus:ring-4 focus:outline-none focus:ring-[#050708]/50 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:focus:ring-[#050708]/50 dark:hover:bg-[#050708]/30 mr-2 mb-2 h-12" disabled>
+                            Adding.....
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="w-full flex flex-col items-center gap-4" data-behavior="viewSection">
+                <h5 class="text-2xl">Current Amount: <span data-behavior="current-amount"></span></h5>
+                <table class="bg-black text-white overflow-y-auto border-4 border-red-900" style="height: 25vh;">
+                    <thead class="border-b border-white text-center">
+                        <tr>
+                            <th scope="col">Date</th>
+                            <th scope="col">Description</th>
+                            <th scope="col">Amount</th>
+                            <th scope="col">Type</th>
+                        </tr>
+                    </thead>
+                    <tbody data-behavior="data-container" class="text-center"></tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+    <div class="flex justify-center -mt-16 gap-8">
+        <div>
+            <a class="github-button" href="https://github.com/achyutkneupane" data-color-scheme="no-preference: dark; light: light; dark: dark;" data-size="large" data-show-count="true" aria-label="Follow @achyutkneupane on GitHub">Follow @achyutkneupane</a>
+        </div>
+        <div>
+            <a class="github-button" href="https://github.com/achyutkneupane/NearExpenseTracker" data-color-scheme="no-preference: dark; light: light; dark: dark;" data-icon="octicon-star" data-size="large" data-show-count="true" aria-label="Star achyutkneupane/NearExpenseTracker on GitHub">Star</a>
+        </div>
+    </div>
 </body>
+
+<script src="./index.js"></script>
+<script src="https://unpkg.com/flowbite@1.4.1/dist/flowbite.js"></script>
+<script async defer src="https://buttons.github.io/buttons.js"></script>
+</body>
+
 </html>

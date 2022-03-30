@@ -17325,8 +17325,398 @@ __exportStar(require("./common-index"), exports);
 __exportStar(require("./browser-connect"), exports);
 require("error-polyfill");
 
-},{"./key_stores/browser-index":"../node_modules/near-api-js/lib/key_stores/browser-index.js","./common-index":"../node_modules/near-api-js/lib/common-index.js","./browser-connect":"../node_modules/near-api-js/lib/browser-connect.js","error-polyfill":"../node_modules/error-polyfill/index.js"}],"config.js":[function(require,module,exports) {
-var CONTRACT_NAME = "dev-1648472931291-53206068310248" || 'nearexpensetracker.achyut.testnet';
+},{"./key_stores/browser-index":"../node_modules/near-api-js/lib/key_stores/browser-index.js","./common-index":"../node_modules/near-api-js/lib/common-index.js","./browser-connect":"../node_modules/near-api-js/lib/browser-connect.js","error-polyfill":"../node_modules/error-polyfill/index.js"}],"../node_modules/path-browserify/index.js":[function(require,module,exports) {
+var process = require("process");
+// .dirname, .basename, and .extname methods are extracted from Node.js v8.11.1,
+// backported and transplited with Babel, with backwards-compat fixes
+
+// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+// resolves . and .. elements in a path array with directory names there
+// must be no slashes, empty elements, or device names (c:\) in the array
+// (so also no leading and trailing slashes - it does not distinguish
+// relative and absolute paths)
+function normalizeArray(parts, allowAboveRoot) {
+  // if the path tries to go above the root, `up` ends up > 0
+  var up = 0;
+  for (var i = parts.length - 1; i >= 0; i--) {
+    var last = parts[i];
+    if (last === '.') {
+      parts.splice(i, 1);
+    } else if (last === '..') {
+      parts.splice(i, 1);
+      up++;
+    } else if (up) {
+      parts.splice(i, 1);
+      up--;
+    }
+  }
+
+  // if the path is allowed to go above the root, restore leading ..s
+  if (allowAboveRoot) {
+    for (; up--; up) {
+      parts.unshift('..');
+    }
+  }
+
+  return parts;
+}
+
+// path.resolve([from ...], to)
+// posix version
+exports.resolve = function() {
+  var resolvedPath = '',
+      resolvedAbsolute = false;
+
+  for (var i = arguments.length - 1; i >= -1 && !resolvedAbsolute; i--) {
+    var path = (i >= 0) ? arguments[i] : process.cwd();
+
+    // Skip empty and invalid entries
+    if (typeof path !== 'string') {
+      throw new TypeError('Arguments to path.resolve must be strings');
+    } else if (!path) {
+      continue;
+    }
+
+    resolvedPath = path + '/' + resolvedPath;
+    resolvedAbsolute = path.charAt(0) === '/';
+  }
+
+  // At this point the path should be resolved to a full absolute path, but
+  // handle relative paths to be safe (might happen when process.cwd() fails)
+
+  // Normalize the path
+  resolvedPath = normalizeArray(filter(resolvedPath.split('/'), function(p) {
+    return !!p;
+  }), !resolvedAbsolute).join('/');
+
+  return ((resolvedAbsolute ? '/' : '') + resolvedPath) || '.';
+};
+
+// path.normalize(path)
+// posix version
+exports.normalize = function(path) {
+  var isAbsolute = exports.isAbsolute(path),
+      trailingSlash = substr(path, -1) === '/';
+
+  // Normalize the path
+  path = normalizeArray(filter(path.split('/'), function(p) {
+    return !!p;
+  }), !isAbsolute).join('/');
+
+  if (!path && !isAbsolute) {
+    path = '.';
+  }
+  if (path && trailingSlash) {
+    path += '/';
+  }
+
+  return (isAbsolute ? '/' : '') + path;
+};
+
+// posix version
+exports.isAbsolute = function(path) {
+  return path.charAt(0) === '/';
+};
+
+// posix version
+exports.join = function() {
+  var paths = Array.prototype.slice.call(arguments, 0);
+  return exports.normalize(filter(paths, function(p, index) {
+    if (typeof p !== 'string') {
+      throw new TypeError('Arguments to path.join must be strings');
+    }
+    return p;
+  }).join('/'));
+};
+
+
+// path.relative(from, to)
+// posix version
+exports.relative = function(from, to) {
+  from = exports.resolve(from).substr(1);
+  to = exports.resolve(to).substr(1);
+
+  function trim(arr) {
+    var start = 0;
+    for (; start < arr.length; start++) {
+      if (arr[start] !== '') break;
+    }
+
+    var end = arr.length - 1;
+    for (; end >= 0; end--) {
+      if (arr[end] !== '') break;
+    }
+
+    if (start > end) return [];
+    return arr.slice(start, end - start + 1);
+  }
+
+  var fromParts = trim(from.split('/'));
+  var toParts = trim(to.split('/'));
+
+  var length = Math.min(fromParts.length, toParts.length);
+  var samePartsLength = length;
+  for (var i = 0; i < length; i++) {
+    if (fromParts[i] !== toParts[i]) {
+      samePartsLength = i;
+      break;
+    }
+  }
+
+  var outputParts = [];
+  for (var i = samePartsLength; i < fromParts.length; i++) {
+    outputParts.push('..');
+  }
+
+  outputParts = outputParts.concat(toParts.slice(samePartsLength));
+
+  return outputParts.join('/');
+};
+
+exports.sep = '/';
+exports.delimiter = ':';
+
+exports.dirname = function (path) {
+  if (typeof path !== 'string') path = path + '';
+  if (path.length === 0) return '.';
+  var code = path.charCodeAt(0);
+  var hasRoot = code === 47 /*/*/;
+  var end = -1;
+  var matchedSlash = true;
+  for (var i = path.length - 1; i >= 1; --i) {
+    code = path.charCodeAt(i);
+    if (code === 47 /*/*/) {
+        if (!matchedSlash) {
+          end = i;
+          break;
+        }
+      } else {
+      // We saw the first non-path separator
+      matchedSlash = false;
+    }
+  }
+
+  if (end === -1) return hasRoot ? '/' : '.';
+  if (hasRoot && end === 1) {
+    // return '//';
+    // Backwards-compat fix:
+    return '/';
+  }
+  return path.slice(0, end);
+};
+
+function basename(path) {
+  if (typeof path !== 'string') path = path + '';
+
+  var start = 0;
+  var end = -1;
+  var matchedSlash = true;
+  var i;
+
+  for (i = path.length - 1; i >= 0; --i) {
+    if (path.charCodeAt(i) === 47 /*/*/) {
+        // If we reached a path separator that was not part of a set of path
+        // separators at the end of the string, stop now
+        if (!matchedSlash) {
+          start = i + 1;
+          break;
+        }
+      } else if (end === -1) {
+      // We saw the first non-path separator, mark this as the end of our
+      // path component
+      matchedSlash = false;
+      end = i + 1;
+    }
+  }
+
+  if (end === -1) return '';
+  return path.slice(start, end);
+}
+
+// Uses a mixed approach for backwards-compatibility, as ext behavior changed
+// in new Node.js versions, so only basename() above is backported here
+exports.basename = function (path, ext) {
+  var f = basename(path);
+  if (ext && f.substr(-1 * ext.length) === ext) {
+    f = f.substr(0, f.length - ext.length);
+  }
+  return f;
+};
+
+exports.extname = function (path) {
+  if (typeof path !== 'string') path = path + '';
+  var startDot = -1;
+  var startPart = 0;
+  var end = -1;
+  var matchedSlash = true;
+  // Track the state of characters (if any) we see before our first dot and
+  // after any path separator we find
+  var preDotState = 0;
+  for (var i = path.length - 1; i >= 0; --i) {
+    var code = path.charCodeAt(i);
+    if (code === 47 /*/*/) {
+        // If we reached a path separator that was not part of a set of path
+        // separators at the end of the string, stop now
+        if (!matchedSlash) {
+          startPart = i + 1;
+          break;
+        }
+        continue;
+      }
+    if (end === -1) {
+      // We saw the first non-path separator, mark this as the end of our
+      // extension
+      matchedSlash = false;
+      end = i + 1;
+    }
+    if (code === 46 /*.*/) {
+        // If this is our first dot, mark it as the start of our extension
+        if (startDot === -1)
+          startDot = i;
+        else if (preDotState !== 1)
+          preDotState = 1;
+    } else if (startDot !== -1) {
+      // We saw a non-dot and non-path separator before our dot, so we should
+      // have a good chance at having a non-empty extension
+      preDotState = -1;
+    }
+  }
+
+  if (startDot === -1 || end === -1 ||
+      // We saw a non-dot character immediately before the dot
+      preDotState === 0 ||
+      // The (right-most) trimmed path component is exactly '..'
+      preDotState === 1 && startDot === end - 1 && startDot === startPart + 1) {
+    return '';
+  }
+  return path.slice(startDot, end);
+};
+
+function filter (xs, f) {
+    if (xs.filter) return xs.filter(f);
+    var res = [];
+    for (var i = 0; i < xs.length; i++) {
+        if (f(xs[i], i, xs)) res.push(xs[i]);
+    }
+    return res;
+}
+
+// String.prototype.substr - negative index don't work in IE8
+var substr = 'ab'.substr(-1) === 'b'
+    ? function (str, start, len) { return str.substr(start, len) }
+    : function (str, start, len) {
+        if (start < 0) start = str.length + start;
+        return str.substr(start, len);
+    }
+;
+
+},{"process":"../node_modules/process/browser.js"}],"../node_modules/dotenv/lib/main.js":[function(require,module,exports) {
+var process = require("process");
+'use strict';
+
+const fs = require('fs');
+
+const path = require('path');
+/*
+ * Parses a string or buffer into an object
+ * @param {(string|Buffer)} src - source to be parsed
+ * @returns {Object} keys and values from src
+*/
+
+
+function parse(src) {
+  const obj = {}; // convert Buffers before splitting into lines and processing
+
+  src.toString().split('\n').forEach(function (line) {
+    // matching "KEY' and 'VAL' in 'KEY=VAL'
+    const keyValueArr = line.match(/^\s*([\w\.\-]+)\s*=\s*(.*)?\s*$/); // matched?
+
+    if (keyValueArr != null) {
+      const key = keyValueArr[1]; // default undefined or missing values to empty string
+
+      let value = keyValueArr[2] || ''; // expand newlines in quoted values
+
+      const len = value ? value.length : 0;
+
+      if (len > 0 && value.charAt(0) === '"' && value.charAt(len - 1) === '"') {
+        value = value.replace(/\\n/gm, '\n');
+      } // remove any surrounding quotes and extra spaces
+
+
+      value = value.replace(/(^['"]|['"]$)/g, '').trim();
+      obj[key] = value;
+    }
+  });
+  return obj;
+}
+/*
+ * Main entry point into dotenv. Allows configuration before loading .env
+ * @param {Object} options - options for parsing .env file
+ * @param {string} [options.path=.env] - path to .env file
+ * @param {string} [options.encoding=utf8] - encoding of .env file
+ * @returns {Object} parsed object or error
+*/
+
+
+function config(options) {
+  let dotenvPath = path.resolve(process.cwd(), '.env');
+  let encoding = 'utf8';
+
+  if (options) {
+    if (options.path) {
+      dotenvPath = options.path;
+    }
+
+    if (options.encoding) {
+      encoding = options.encoding;
+    }
+  }
+
+  try {
+    // specifying an encoding returns a string instead of a buffer
+    const parsed = parse(fs.readFileSync(dotenvPath, {
+      encoding: encoding
+    }));
+    Object.keys(parsed).forEach(function (key) {
+      if (!process.env.hasOwnProperty(key)) {
+        process.env[key] = parsed[key];
+      }
+    });
+    return {
+      parsed: parsed
+    };
+  } catch (e) {
+    return {
+      error: e
+    };
+  }
+}
+
+module.exports.config = config;
+module.exports.load = config;
+module.exports.parse = parse;
+},{"fs":"../node_modules/parcel-bundler/src/builtins/_empty.js","path":"../node_modules/path-browserify/index.js","process":"../node_modules/process/browser.js"}],"config.js":[function(require,module,exports) {
+var CONTRACT_NAME = "dev-1648573710796-46567518158785" || 'nearexpensetracker.achyut.testnet';
 
 function getConfig(env) {
   switch (env) {
@@ -17414,7 +17804,7 @@ function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try
 
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
-var nearConfig = (0, _config.default)("development" || 'development'); // Initialize contract & set global variables
+var nearConfig = (0, _config.default)("development" || 'testnet'); // Initialize contract & set global variables
 
 function initContract() {
   return _initContract.apply(this, arguments);
@@ -17491,67 +17881,196 @@ function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try
 
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
-var _getConfig = (0, _config.default)("development" || 'development'),
+var nearAPI = require("near-api-js");
+
+var connect = nearAPI.connect,
+    KeyPair = nearAPI.KeyPair,
+    keyStores = nearAPI.keyStores,
+    utils = nearAPI.utils,
+    WalletConnection = nearAPI.WalletConnection;
+
+require("dotenv").config();
+
+var _getConfig = (0, _config.default)("development" || "development"),
     networkId = _getConfig.networkId;
 
-var allTransactions; // const submitButton = document.querySelector('form button')
-// document.querySelector('form').onsubmit = async (event) => {
-//   event.preventDefault()
-//   // get elements from the form using their id attribute
-//   const { fieldset, transactions } = event.target.elements
-//   // disable the form while the value gets updated on-chain
-//   fieldset.disabled = true
-//   try {
-//     // make an update call to the smart contract
-//     await window.contract.addTransaction({
-//       // pass the value that the user entered in the greeting field
-//       type: transactions.type,
-//       amount: transactions.amount,
-//       description: transactions.description,
-//       dateTime: transactions.dateTime,
-//     })
-//   } catch (e) {
-//     alert(
-//       'Something went wrong! ' +
-//       'Maybe you need to sign out and back in? ' +
-//       'Check your browser console for more info.'
-//     )
-//     throw e
-//   } finally {
-//     // re-enable the form, whether the call succeeded or failed
-//     fieldset.disabled = false
-//   }
-//   // disable the save button, since it now matches the persisted value
-//   submitButton.disabled = true
-//   // update the greeting in the UI
-//   await fetchTrans()
-//   // // show notification
-//   // document.querySelector('[data-behavior=notification]').style.display = 'block'
-//   // // remove notification again after css animation completes
-//   // // this allows it to be shown again next time the form is submitted
-//   // setTimeout(() => {
-//   //   document.querySelector('[data-behavior=notification]').style.display = 'none'
-//   // }, 11000)
-// }
-// document.querySelector('input#greeting').oninput = (event) => {
-//   if (event.target.value !== currentGreeting) {
-//     submitButton.disabled = false
-//   } else {
-//     submitButton.disabled = true
-//   }
-// }
+var keyStore = new keyStores.BrowserLocalStorageKeyStore();
+var config = {
+  networkId: "testnet",
+  keyStore: keyStore,
+  nodeUrl: "https://rpc.testnet.near.org",
+  walletUrl: "https://wallet.testnet.near.org",
+  helperUrl: "https://helper.testnet.near.org",
+  explorerUrl: "https://explorer.testnet.near.org"
+};
+var allTransactions;
+var submitButton = document.querySelector("#add-transaction");
 
-document.querySelector('#sign-in-button').onclick = _utils.login;
-document.querySelector('#sign-out-button').onclick = _utils.logout; // Display the signed-out-flow container
+submitButton.onclick = /*#__PURE__*/function () {
+  var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(event) {
+    var description, amount, type, dateTime, donation, transaction, response;
+    return regeneratorRuntime.wrap(function _callee$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
+            event.preventDefault();
+            description = document.querySelector("#description").value;
+            amount = document.querySelector("#amount").value;
+            type = document.querySelector("#type").value;
+            dateTime = document.querySelector("#dateTime").value;
+            donation = document.querySelector("#donation").value;
+
+            if (!(!description || !amount || !dateTime || !type)) {
+              _context.next = 9;
+              break;
+            }
+
+            document.querySelector("[data-behavior=form-error]").innerText = "Please enter all fields";
+            return _context.abrupt("return");
+
+          case 9:
+            transaction = {
+              description: description,
+              amount: amount,
+              type: type,
+              dateTime: dateTime
+            };
+            submitButton.style.display = "none";
+            document.querySelector("#waitingButton").style.display = "flex";
+            _context.next = 14;
+            return contract.addTransaction(transaction);
+
+          case 14:
+            response = _context.sent;
+
+            if (!donation) {
+              _context.next = 18;
+              break;
+            }
+
+            _context.next = 18;
+            return sendDonation(donation);
+
+          case 18:
+            document.querySelector("#description").value = "";
+            document.querySelector("#amount").value = "";
+            document.querySelector("#type").value = "";
+            document.querySelector("#dateTime").value = "";
+            submitButton.style.display = "flex";
+            document.querySelector("#waitingButton").style.display = "none";
+            viewList();
+            _context.next = 27;
+            return fetchTrans();
+
+          case 27:
+          case "end":
+            return _context.stop();
+        }
+      }
+    }, _callee);
+  }));
+
+  return function (_x) {
+    return _ref.apply(this, arguments);
+  };
+}();
+
+function sendDonation(_x2) {
+  return _sendDonation.apply(this, arguments);
+}
+
+function _sendDonation() {
+  _sendDonation = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee4(donation) {
+    var donationAmount, sender, receiver, networkId, near, senderAccount, result, transactionLink;
+    return regeneratorRuntime.wrap(function _callee4$(_context4) {
+      while (1) {
+        switch (_context4.prev = _context4.next) {
+          case 0:
+            donationAmount = nearAPI.utils.format.parseNearAmount(donation);
+            console.log("Sending donation of " + donation + " NEAR and " + donationAmount);
+            sender = window.accountId;
+            receiver = "achyut.testnet";
+            networkId = "testnet";
+            _context4.next = 7;
+            return connect(config);
+
+          case 7:
+            near = _context4.sent;
+            _context4.next = 10;
+            return near.account(sender);
+
+          case 10:
+            senderAccount = _context4.sent;
+            _context4.next = 13;
+            return senderAccount.sendMoney(receiver, donationAmount);
+
+          case 13:
+            result = _context4.sent;
+            transactionLink = "https://explorer.".concat(networkId, ".near.org/transactions/").concat(result.transaction.hash);
+            console.log("Transaction sent successfully. Transaction link: ".concat(transactionLink));
+
+          case 16:
+          case "end":
+            return _context4.stop();
+        }
+      }
+    }, _callee4);
+  }));
+  return _sendDonation.apply(this, arguments);
+}
+
+document.querySelector("#sign-in-button").onclick = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
+  var nearConfig, near, wallet;
+  return regeneratorRuntime.wrap(function _callee2$(_context2) {
+    while (1) {
+      switch (_context2.prev = _context2.next) {
+        case 0:
+          nearConfig = (0, _config.default)("development" || 'testnet');
+          _context2.next = 3;
+          return connect(config);
+
+        case 3:
+          near = _context2.sent;
+          wallet = new WalletConnection(near);
+          wallet.requestSignIn(nearConfig.contractName, "NEAR Expense Tracker");
+
+        case 6:
+        case "end":
+          return _context2.stop();
+      }
+    }
+  }, _callee2);
+}));
+document.querySelector("#sign-out-button").onclick = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee3() {
+  var near, wallet;
+  return regeneratorRuntime.wrap(function _callee3$(_context3) {
+    while (1) {
+      switch (_context3.prev = _context3.next) {
+        case 0:
+          _context3.next = 2;
+          return connect(config);
+
+        case 2:
+          near = _context3.sent;
+          wallet = new WalletConnection(near);
+          wallet.signOut();
+
+        case 5:
+        case "end":
+          return _context3.stop();
+      }
+    }
+  }, _callee3);
+})); // Display the signed-out-flow container
 
 function signedOutFlow() {
-  document.querySelector('#signed-out-flow').style.display = 'block';
+  document.querySelector("#signed-out-flow").style.display = "block";
 } // Displaying the signed in flow container and fill in account-specific data
 
 
 function signedInFlow() {
-  document.querySelector('#signed-in-flow').style.display = 'block';
-  document.querySelectorAll('[data-behavior=account-id]').forEach(function (el) {
+  document.querySelector("#signed-in-flow").style.display = "block";
+  document.querySelectorAll("[data-behavior=account-id]").forEach(function (el) {
     el.innerText = window.accountId;
   });
   fetchTrans();
@@ -17560,43 +18079,82 @@ function signedInFlow() {
 
 function fetchTrans() {
   return _fetchTrans.apply(this, arguments);
-} // `nearInitPromise` gets called on page load
-
+}
 
 function _fetchTrans() {
-  _fetchTrans = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
-    return regeneratorRuntime.wrap(function _callee$(_context) {
+  _fetchTrans = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee5() {
+    var currentAmount, dataContainer;
+    return regeneratorRuntime.wrap(function _callee5$(_context5) {
       while (1) {
-        switch (_context.prev = _context.next) {
+        switch (_context5.prev = _context5.next) {
           case 0:
-            _context.next = 2;
+            _context5.next = 2;
             return contract.getTransactions({
               user: window.accountId
             });
 
           case 2:
-            allTransactions = _context.sent;
-            console.log(allTransactions); // document.querySelectorAll('[data-behavior=expense_tracker]').forEach(el => {
-            //   // set divs, spans, etc
-            //   el.innerText = currentGreeting
-            //   // set input elements
-            //   el.value = currentGreeting
-            // })
+            allTransactions = _context5.sent;
+            currentAmount = 0;
+            dataContainer = document.querySelector("[data-behavior=data-container]");
+            dataContainer.innerHTML = "";
+            allTransactions.forEach(function (transaction) {
+              if (transaction.type === "Expense") {
+                currentAmount -= ~~transaction.amount;
+              } else if (transaction.type === "Income") {
+                currentAmount += ~~transaction.amount;
+              } else {
+                currentAmount;
+              }
 
-          case 4:
+              var type = transaction.type,
+                  amount = transaction.amount,
+                  description = transaction.description,
+                  dateTime = transaction.dateTime;
+              var newRow = document.createElement("tr");
+              newRow.innerHTML = "\n      <td>".concat(dateTime, "</td>\n      <td>").concat(description, "</td>\n      <td>").concat(amount, "</td>\n      <td>").concat(type, "</td>\n    ");
+              dataContainer.appendChild(newRow);
+            });
+            document.querySelector("[data-behavior=current-amount]").innerText = currentAmount;
+
+          case 8:
           case "end":
-            return _context.stop();
+            return _context5.stop();
         }
       }
-    }, _callee);
+    }, _callee5);
   }));
   return _fetchTrans.apply(this, arguments);
 }
 
+document.querySelector("#show-form").onclick = function () {
+  addTransactionForm();
+};
+
+document.querySelector("#cancel-form").onclick = function () {
+  viewList();
+};
+
+function addTransactionForm() {
+  document.querySelector("[data-behavior=addTransForm]").style.display = "flex";
+  document.querySelector("[data-behavior=viewSection]").style.display = "none";
+  document.querySelector("#show-form").style.display = "none";
+  document.querySelector("#cancel-form").style.display = "block";
+}
+
+function viewList() {
+  document.querySelector("[data-behavior=form-error]").innerText = "";
+  document.querySelector("[data-behavior=addTransForm]").style.display = "none";
+  document.querySelector("[data-behavior=viewSection]").style.display = "flex";
+  document.querySelector("#show-form").style.display = "block";
+  document.querySelector("#cancel-form").style.display = "none";
+} // `nearInitPromise` gets called on page load
+
+
 window.nearInitPromise = (0, _utils.initContract)().then(function () {
   if (window.walletConnection.isSignedIn()) signedInFlow();else signedOutFlow();
 }).catch(console.error);
-},{"regenerator-runtime/runtime":"../node_modules/regenerator-runtime/runtime.js","./utils":"utils.js","./config":"config.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"regenerator-runtime/runtime":"../node_modules/regenerator-runtime/runtime.js","near-api-js":"../node_modules/near-api-js/lib/browser-index.js","dotenv":"../node_modules/dotenv/lib/main.js","./utils":"utils.js","./config":"config.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -17624,7 +18182,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "52598" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "54660" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

@@ -1,105 +1,167 @@
-import 'regenerator-runtime/runtime'
+import "regenerator-runtime/runtime";
 
-import { initContract, login, logout } from './utils'
+const nearAPI = require("near-api-js");
+const { connect, KeyPair, keyStores, utils, WalletConnection } = nearAPI;
+require("dotenv").config();
 
-import getConfig from './config'
-const { networkId } = getConfig(process.env.NODE_ENV || 'development')
+import { initContract, login, logout } from "./utils";
 
-let allTransactions
+import getConfig from "./config";
+const { networkId } = getConfig(process.env.NODE_ENV || "development");
 
-// const submitButton = document.querySelector('form button')
+const keyStore = new keyStores.BrowserLocalStorageKeyStore();
+  const config = {
+    networkId: "testnet",
+    keyStore,
+    nodeUrl: "https://rpc.testnet.near.org",
+    walletUrl: "https://wallet.testnet.near.org",
+    helperUrl: "https://helper.testnet.near.org",
+    explorerUrl: "https://explorer.testnet.near.org",
+  };
 
-// document.querySelector('form').onsubmit = async (event) => {
-//   event.preventDefault()
+let allTransactions;
 
-//   // get elements from the form using their id attribute
-//   const { fieldset, transactions } = event.target.elements
 
-//   // disable the form while the value gets updated on-chain
-//   fieldset.disabled = true
+const submitButton = document.querySelector("#add-transaction");
 
-//   try {
-//     // make an update call to the smart contract
-//     await window.contract.addTransaction({
-//       // pass the value that the user entered in the greeting field
-//       type: transactions.type,
-//       amount: transactions.amount,
-//       description: transactions.description,
-//       dateTime: transactions.dateTime,
-//     })
-//   } catch (e) {
-//     alert(
-//       'Something went wrong! ' +
-//       'Maybe you need to sign out and back in? ' +
-//       'Check your browser console for more info.'
-//     )
-//     throw e
-//   } finally {
-//     // re-enable the form, whether the call succeeded or failed
-//     fieldset.disabled = false
-//   }
+submitButton.onclick = async (event) => {
+  event.preventDefault();
+  const description = document.querySelector("#description").value;
+  const amount = document.querySelector("#amount").value;
+  const type = document.querySelector("#type").value;
+  const dateTime = document.querySelector("#dateTime").value;
+  const donation = document.querySelector("#donation").value;
 
-//   // disable the save button, since it now matches the persisted value
-//   submitButton.disabled = true
+  if (!description || !amount || !dateTime || !type) {
+    document.querySelector("[data-behavior=form-error]").innerText =
+      "Please enter all fields";
+    return;
+  }
+  const transaction = {
+    description: description,
+    amount: amount,
+    type: type,
+    dateTime: dateTime,
+  };
+  submitButton.style.display = "none";
+  document.querySelector("#waitingButton").style.display = "flex";
 
-//   // update the greeting in the UI
-//   await fetchTrans()
+  const response = await contract.addTransaction(transaction);
+  if (donation) await sendDonation(donation);
 
-//   // // show notification
-//   // document.querySelector('[data-behavior=notification]').style.display = 'block'
+  document.querySelector("#description").value = "";
+  document.querySelector("#amount").value = "";
+  document.querySelector("#type").value = "";
+  document.querySelector("#dateTime").value = "";
 
-//   // // remove notification again after css animation completes
-//   // // this allows it to be shown again next time the form is submitted
-//   // setTimeout(() => {
-//   //   document.querySelector('[data-behavior=notification]').style.display = 'none'
-//   // }, 11000)
-// }
+  submitButton.style.display = "flex";
+  document.querySelector("#waitingButton").style.display = "none";
+  viewList();
+  await fetchTrans();
+};
 
-// document.querySelector('input#greeting').oninput = (event) => {
-//   if (event.target.value !== currentGreeting) {
-//     submitButton.disabled = false
-//   } else {
-//     submitButton.disabled = true
-//   }
-// }
+async function sendDonation(donation) {
+  const donationAmount = nearAPI.utils.format.parseNearAmount(donation);
+  console.log(
+    "Sending donation of " + donation + " NEAR and " + donationAmount
+  );
+  const sender = window.accountId;
+  const receiver = "achyut.testnet";
+  const networkId = "testnet";
+  const near = await connect(config);
+  const senderAccount = await near.account(sender);
+  const result = await senderAccount.sendMoney(receiver, donationAmount);
 
-document.querySelector('#sign-in-button').onclick = login
-document.querySelector('#sign-out-button').onclick = logout
+  const transactionLink = `https://explorer.${networkId}.near.org/transactions/${result.transaction.hash}`;
+  console.log(
+    `Transaction sent successfully. Transaction link: ${transactionLink}`
+  );
+}
+
+document.querySelector("#sign-in-button").onclick = async () => {
+  const nearConfig = getConfig(process.env.NODE_ENV || 'testnet')
+  const near = await connect(config);
+  const wallet = new WalletConnection(near);
+  wallet.requestSignIn(nearConfig.contractName, "NEAR Expense Tracker");
+};
+document.querySelector("#sign-out-button").onclick = async () => {
+  const near = await connect(config);
+  const wallet = new WalletConnection(near);
+  wallet.signOut();
+};
 
 // Display the signed-out-flow container
 function signedOutFlow() {
-  document.querySelector('#signed-out-flow').style.display = 'block'
+  document.querySelector("#signed-out-flow").style.display = "block";
 }
 
 // Displaying the signed in flow container and fill in account-specific data
 function signedInFlow() {
-  document.querySelector('#signed-in-flow').style.display = 'block'
+  document.querySelector("#signed-in-flow").style.display = "block";
 
-  document.querySelectorAll('[data-behavior=account-id]').forEach(el => {
-    el.innerText = window.accountId
-  })
+  document.querySelectorAll("[data-behavior=account-id]").forEach((el) => {
+    el.innerText = window.accountId;
+  });
 
-
-  fetchTrans()
+  fetchTrans();
 }
 
 // update global currentGreeting variable; update DOM with it
 async function fetchTrans() {
   allTransactions = await contract.getTransactions({ user: window.accountId });
-  console.log(allTransactions);
-  // document.querySelectorAll('[data-behavior=expense_tracker]').forEach(el => {
-  //   // set divs, spans, etc
-  //   el.innerText = currentGreeting
+  let currentAmount = 0;
+  const dataContainer = document.querySelector(
+    "[data-behavior=data-container]"
+  );
+  dataContainer.innerHTML = "";
+  allTransactions.forEach((transaction) => {
+    if (transaction.type === "Expense") {
+      currentAmount -= ~~transaction.amount;
+    } else if (transaction.type === "Income") {
+      currentAmount += ~~transaction.amount;
+    } else {
+      currentAmount;
+    }
+    const { type, amount, description, dateTime } = transaction;
+    const newRow = document.createElement("tr");
+    newRow.innerHTML = `
+      <td>${dateTime}</td>
+      <td>${description}</td>
+      <td>${amount}</td>
+      <td>${type}</td>
+    `;
+    dataContainer.appendChild(newRow);
+  });
+  document.querySelector("[data-behavior=current-amount]").innerText =
+    currentAmount;
+}
 
-  //   // set input elements
-  //   el.value = currentGreeting
-  // })
+document.querySelector("#show-form").onclick = () => {
+  addTransactionForm();
+};
+
+document.querySelector("#cancel-form").onclick = () => {
+  viewList();
+};
+
+function addTransactionForm() {
+  document.querySelector("[data-behavior=addTransForm]").style.display = "flex";
+  document.querySelector("[data-behavior=viewSection]").style.display = "none";
+  document.querySelector("#show-form").style.display = "none";
+  document.querySelector("#cancel-form").style.display = "block";
+}
+function viewList() {
+  document.querySelector("[data-behavior=form-error]").innerText = "";
+  document.querySelector("[data-behavior=addTransForm]").style.display = "none";
+  document.querySelector("[data-behavior=viewSection]").style.display = "flex";
+  document.querySelector("#show-form").style.display = "block";
+  document.querySelector("#cancel-form").style.display = "none";
 }
 
 // `nearInitPromise` gets called on page load
 window.nearInitPromise = initContract()
   .then(() => {
-    if (window.walletConnection.isSignedIn()) signedInFlow()
-    else signedOutFlow()
+    if (window.walletConnection.isSignedIn()) signedInFlow();
+    else signedOutFlow();
   })
-  .catch(console.error)
+  .catch(console.error);

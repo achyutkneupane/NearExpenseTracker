@@ -1,3 +1,6 @@
+import { PersistentVector } from "near-sdk-as";
+
+@nearBindgen 
 export class Transaction {
   user: string;
   type: string;
@@ -19,3 +22,5 @@ export class Transaction {
     this.description = description;
   }
 }
+
+export const transactions: PersistentVector<Transaction> = new PersistentVector<Transaction>("trans");
