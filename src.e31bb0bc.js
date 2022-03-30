@@ -17908,7 +17908,7 @@ var submitButton = document.querySelector("#add-transaction");
 
 submitButton.onclick = /*#__PURE__*/function () {
   var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(event) {
-    var description, amount, type, dateTime, donation, transaction, response;
+    var description, amount, type, dateTime, transaction, response;
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
@@ -17917,18 +17917,17 @@ submitButton.onclick = /*#__PURE__*/function () {
             description = document.querySelector("#description").value;
             amount = document.querySelector("#amount").value;
             type = document.querySelector("#type").value;
-            dateTime = document.querySelector("#dateTime").value;
-            donation = document.querySelector("#donation").value;
+            dateTime = document.querySelector("#dateTime").value; // const donation = document.querySelector("#donation").value;
 
             if (!(!description || !amount || !dateTime || !type)) {
-              _context.next = 9;
+              _context.next = 8;
               break;
             }
 
             document.querySelector("[data-behavior=form-error]").innerText = "Please enter all fields";
             return _context.abrupt("return");
 
-          case 9:
+          case 8:
             transaction = {
               description: description,
               amount: amount,
@@ -17937,21 +17936,12 @@ submitButton.onclick = /*#__PURE__*/function () {
             };
             submitButton.style.display = "none";
             document.querySelector("#waitingButton").style.display = "flex";
-            _context.next = 14;
+            _context.next = 13;
             return contract.addTransaction(transaction);
 
-          case 14:
+          case 13:
             response = _context.sent;
-
-            if (!donation) {
-              _context.next = 18;
-              break;
-            }
-
-            _context.next = 18;
-            return sendDonation(donation);
-
-          case 18:
+            // if (donation) await sendDonation(donation);
             document.querySelector("#description").value = "";
             document.querySelector("#amount").value = "";
             document.querySelector("#type").value = "";
@@ -17959,10 +17949,10 @@ submitButton.onclick = /*#__PURE__*/function () {
             submitButton.style.display = "flex";
             document.querySelector("#waitingButton").style.display = "none";
             viewList();
-            _context.next = 27;
+            _context.next = 23;
             return fetchTrans();
 
-          case 27:
+          case 23:
           case "end":
             return _context.stop();
         }
@@ -17973,51 +17963,24 @@ submitButton.onclick = /*#__PURE__*/function () {
   return function (_x) {
     return _ref.apply(this, arguments);
   };
-}();
+}(); // This is for future update. I am not being able to add donations and also I am not getting proper support from community
+// async function sendDonation(donation) {
+//   const donationAmount = nearAPI.utils.format.parseNearAmount(donation);
+//   console.log(
+//     "Sending donation of " + donation + " NEAR and " + donationAmount
+//   );
+//   const sender = window.accountId;
+//   const receiver = "achyut.testnet";
+//   const networkId = "testnet";
+//   const near = await connect(config);
+//   const senderAccount = await near.account(sender);
+//   const result = await senderAccount.sendMoney(receiver, donationAmount);
+//   const transactionLink = `https://explorer.${networkId}.near.org/transactions/${result.transaction.hash}`;
+//   console.log(
+//     `Transaction sent successfully. Transaction link: ${transactionLink}`
+//   );
+// }
 
-function sendDonation(_x2) {
-  return _sendDonation.apply(this, arguments);
-}
-
-function _sendDonation() {
-  _sendDonation = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee4(donation) {
-    var donationAmount, sender, receiver, networkId, near, senderAccount, result, transactionLink;
-    return regeneratorRuntime.wrap(function _callee4$(_context4) {
-      while (1) {
-        switch (_context4.prev = _context4.next) {
-          case 0:
-            donationAmount = nearAPI.utils.format.parseNearAmount(donation);
-            console.log("Sending donation of " + donation + " NEAR and " + donationAmount);
-            sender = window.accountId;
-            receiver = "achyut.testnet";
-            networkId = "testnet";
-            _context4.next = 7;
-            return connect(config);
-
-          case 7:
-            near = _context4.sent;
-            _context4.next = 10;
-            return near.account(sender);
-
-          case 10:
-            senderAccount = _context4.sent;
-            _context4.next = 13;
-            return senderAccount.sendMoney(receiver, donationAmount);
-
-          case 13:
-            result = _context4.sent;
-            transactionLink = "https://explorer.".concat(networkId, ".near.org/transactions/").concat(result.transaction.hash);
-            console.log("Transaction sent successfully. Transaction link: ".concat(transactionLink));
-
-          case 16:
-          case "end":
-            return _context4.stop();
-        }
-      }
-    }, _callee4);
-  }));
-  return _sendDonation.apply(this, arguments);
-}
 
 document.querySelector("#sign-in-button").onclick = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
   var nearConfig, near, wallet;
@@ -18025,7 +17988,7 @@ document.querySelector("#sign-in-button").onclick = /*#__PURE__*/_asyncToGenerat
     while (1) {
       switch (_context2.prev = _context2.next) {
         case 0:
-          nearConfig = (0, _config.default)("development" || 'testnet');
+          nearConfig = (0, _config.default)("development" || "testnet");
           _context2.next = 3;
           return connect(config);
 
@@ -18082,19 +18045,19 @@ function fetchTrans() {
 }
 
 function _fetchTrans() {
-  _fetchTrans = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee5() {
+  _fetchTrans = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee4() {
     var currentAmount, dataContainer;
-    return regeneratorRuntime.wrap(function _callee5$(_context5) {
+    return regeneratorRuntime.wrap(function _callee4$(_context4) {
       while (1) {
-        switch (_context5.prev = _context5.next) {
+        switch (_context4.prev = _context4.next) {
           case 0:
-            _context5.next = 2;
+            _context4.next = 2;
             return contract.getTransactions({
               user: window.accountId
             });
 
           case 2:
-            allTransactions = _context5.sent;
+            allTransactions = _context4.sent;
             currentAmount = 0;
             dataContainer = document.querySelector("[data-behavior=data-container]");
             dataContainer.innerHTML = "";
@@ -18119,10 +18082,10 @@ function _fetchTrans() {
 
           case 8:
           case "end":
-            return _context5.stop();
+            return _context4.stop();
         }
       }
-    }, _callee5);
+    }, _callee4);
   }));
   return _fetchTrans.apply(this, arguments);
 }
@@ -18182,7 +18145,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "54660" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "65212" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
