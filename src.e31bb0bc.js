@@ -17804,8 +17804,7 @@ function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try
 
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
-console.log("Env: " + "development");
-var nearConfig = (0, _config.default)("development" || 'development'); // Initialize contract & set global variables
+var nearConfig = (0, _config.default)('development'); // Initialize contract & set global variables
 
 function initContract() {
   return _initContract.apply(this, arguments);
@@ -17897,7 +17896,7 @@ var _getConfig = (0, _config.default)("development" || "development"),
 
 var keyStore = new keyStores.BrowserLocalStorageKeyStore();
 var config = {
-  networkId: "testnet",
+  networkId: networkId,
   keyStore: keyStore,
   nodeUrl: "https://rpc.testnet.near.org",
   walletUrl: "https://wallet.testnet.near.org",
@@ -17942,10 +17941,9 @@ submitButton.onclick = /*#__PURE__*/function () {
 
           case 13:
             response = _context.sent;
-            // if (donation) await sendDonation(donation);
             document.querySelector("#description").value = "";
             document.querySelector("#amount").value = "";
-            document.querySelector("#type").value = "";
+            document.querySelector("#type").value = "Expense";
             document.querySelector("#dateTime").value = "";
             submitButton.style.display = "flex";
             document.querySelector("#waitingButton").style.display = "none";
@@ -17997,8 +17995,9 @@ document.querySelector("#sign-in-button").onclick = /*#__PURE__*/_asyncToGenerat
           near = _context2.sent;
           wallet = new WalletConnection(near);
           wallet.requestSignIn(nearConfig.contractName, "NEAR Expense Tracker");
+          signedInFlow();
 
-        case 6:
+        case 7:
         case "end":
           return _context2.stop();
       }
@@ -18018,8 +18017,9 @@ document.querySelector("#sign-out-button").onclick = /*#__PURE__*/_asyncToGenera
           near = _context3.sent;
           wallet = new WalletConnection(near);
           wallet.signOut();
+          signedOutFlow();
 
-        case 5:
+        case 6:
         case "end":
           return _context3.stop();
       }
@@ -18035,11 +18035,10 @@ function signedOutFlow() {
 function signedInFlow() {
   document.querySelector("#signed-in-flow").style.display = "block";
   document.querySelectorAll("[data-behavior=account-id]").forEach(function (el) {
-    el.innerText = window.accountId;
+    el.innerHTML = "<a href=\"https://explorer.testnet.near.org/accounts/".concat(window.accountId, "\" target=\"_blank\">").concat(window.accountId, "</a>");
   });
   fetchTrans();
-} // update global currentGreeting variable; update DOM with it
-
+}
 
 function fetchTrans() {
   return _fetchTrans.apply(this, arguments);
@@ -18146,7 +18145,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "63794" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "52733" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
