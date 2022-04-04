@@ -13,7 +13,7 @@ export class Transaction {
     type: string,
     amount: string,
     dateTime: string,
-    description: string
+    description: string,
   ) {
     this.user = user;
     this.type = type;
