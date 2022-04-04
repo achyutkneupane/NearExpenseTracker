@@ -3,6 +3,8 @@ import React, { useEffect } from "react";
 function TransactionList() {
   const [currentAmount, setCurrentAmount] = React.useState(0);
   const [allTransactions, setAllTransactions] = React.useState([]);
+    const [loading, setLoading] = React.useState(true);
+
 
   useEffect(() => {
     async function getTransactions() {
@@ -20,6 +22,7 @@ function TransactionList() {
             }
             setAllTransactions(transList);
             setCurrentAmount(currentAmount);
+            setLoading(false);
           });
     }
     getTransactions();
@@ -32,8 +35,13 @@ function TransactionList() {
         className="w-full flex flex-col items-center gap-4"
         data-behavior="viewSection"
       >
-        <h5 className="text-2xl">Current Amount: {currentAmount}</h5>
-        <table className="bg-black text-white overflow-y-auto w-2/3">
+        <h5 className="text-2xl">Current Amount: {loading ? (<span className='text-gray-500'>Fetching....</span>) : currentAmount}</h5>
+        {loading ?
+        (<div className="w-full flex flex-col items-center gap-4">
+            <h5 className="text-2xl">Loading...</h5>
+            </div>) : 
+        (
+            <table className="bg-black text-white overflow-y-auto w-2/3">
           <thead className="border-b border-white text-center">
             <tr>
               <th scope="col">Date</th>
@@ -56,6 +64,8 @@ function TransactionList() {
             })}
           </tbody>
         </table>
+        )
+        }
       </div>
     </>
   );

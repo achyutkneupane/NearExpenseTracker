@@ -1,12 +1,48 @@
-import React from "react";
+import React, { useEffect } from "react";
+const {parse, stringify} = require('flatted/cjs');
 
-function AddTransaction() {
+function AddTransaction({setShowAddTransaction,setShowTransactionList}) {
+  const [showFormError, setShowFormError] = React.useState(false);
+  const [waitingResponse, setWaitingResponse] = React.useState(false);
+
+  const addTransactionFunc = async (event) => {
+    setWaitingResponse(true);
+    event.preventDefault();
+
+    const { description, amount, type, dateTime } = event.target.elements;
+
+    if (!description || !amount || !dateTime || !type) {
+      setShowFormError(true);
+      return;
+    }
+    const transaction = {
+      description: description.value,
+      amount: amount.value,
+      type: type.value,
+      dateTime: dateTime.value,
+    };
+    try {
+      await window.contract.addTransaction(transaction);
+    } catch (e) {
+      console.error(e);
+    }
+
+    document.querySelector("#description").value = "";
+    document.querySelector("#amount").value = "";
+    document.querySelector("#type").value = "Expense";
+    document.querySelector("#dateTime").value = "";
+    
+    setWaitingResponse(false);
+    setShowAddTransaction(false);
+    setShowTransactionList(true);
+  }
+
   return (
     <>
       <div
         className="w-full flex flex-col items-center"
       >
-        <div className="w-1/3 mb-8 flex flex-col gap-4">
+        <form onSubmit={addTransactionFunc} className="w-1/3 mb-8 flex flex-col gap-4">
           <div className="w-full">
             <label
               htmlFor="date"
@@ -92,30 +128,22 @@ function AddTransaction() {
                     placeholder="Enter Donation Amount (in NEAR)" required>
             </div> */}
           <div className="w-full text-center">
-            <span
-              className="text-red-800 font-bold"
-              data-behavior="form-error"
-            ></span>
+            {showFormError && (
+              <span
+                className="text-red-800 font-bold"
+              >Please enter all fields</span>
+            )}
           </div>
           <div className="w-full flex justify-center">
-            <button
-              type="button"
+            <input
+              type="submit"
               id="add-transaction"
               className="text-white bg-[#050708] hover:bg-[#050708]/90 focus:ring-4 focus:outline-none focus:ring-[#050708]/50 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:focus:ring-[#050708]/50 dark:hover:bg-[#050708]/30 mr-2 mb-2 h-12"
-            >
-              + Add
-            </button>
-            <button
-              type="button"
-              id="waitingButton"
-              style={{ display: "none" }}
-              className="text-white hover:text-black bg-gray-700 hover:bg-gray-400 focus:ring-4 focus:outline-none focus:ring-[#050708]/50 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:focus:ring-[#050708]/50 dark:hover:bg-[#050708]/30 mr-2 mb-2 h-12"
-              disabled
-            >
-              Adding.....
-            </button>
+              disabled={waitingResponse}
+              value={waitingResponse ? "Adding..." : "+Add"}
+            />
           </div>
-        </div>
+        </form>
       </div>
     </>
   );

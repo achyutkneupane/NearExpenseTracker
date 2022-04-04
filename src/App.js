@@ -2,7 +2,7 @@ import "regenerator-runtime/runtime";
 
 const nearAPI = require("near-api-js");
 const { connect, KeyPair, keyStores, utils, WalletConnection } = nearAPI;
-import React from 'react';
+import React, { useEffect } from 'react';
 import "./global.css";
 
 import nearLogo from './assets/logo-white.svg'
@@ -29,6 +29,9 @@ export default function App() {
   const [showAddTransaction, setShowAddTransaction] = React.useState(false);
   const [showTransactionList, setShowTransactionList] = React.useState(true);
   const [signedIn, setSignedIn] = React.useState(window.walletConnection.isSignedIn());
+
+  useEffect(() => {
+  }, []);
 
   if (signedIn) {
     return (
@@ -74,7 +77,7 @@ export default function App() {
             </button>
             )}
           </div>
-          {showAddTransaction && <AddTransaction />}
+          {showAddTransaction && <AddTransaction setShowAddTransaction={setShowAddTransaction} setShowTransactionList={setShowTransactionList} />}
           {showTransactionList && <TransactionList />}
         </div>
       </main>

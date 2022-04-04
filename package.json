@@ -33,6 +33,7 @@
   },
   "dependencies": {
     "autoprefixer": "^9.8.8",
+    "flatted": "^3.2.5",
     "near-api-js": "~0.43.1",
     "postcss": "^7.0.39",
     "react": "^18.0.0",

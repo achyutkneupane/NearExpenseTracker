@@ -50234,7 +50234,108 @@ function login() {
   // the private key in localStorage.
   window.walletConnection.requestSignIn(nearConfig.contractName);
 }
-},{"near-api-js":"../node_modules/near-api-js/lib/browser-index.js","./config":"config.js"}],"components/AddTransaction.js":[function(require,module,exports) {
+},{"near-api-js":"../node_modules/near-api-js/lib/browser-index.js","./config":"config.js"}],"../node_modules/flatted/cjs/index.js":[function(require,module,exports) {
+'use strict';
+/*! (c) 2020 Andrea Giammarchi */
+
+const {parse: $parse, stringify: $stringify} = JSON;
+const {keys} = Object;
+
+const Primitive = String;   // it could be Number
+const primitive = 'string'; // it could be 'number'
+
+const ignore = {};
+const object = 'object';
+
+const noop = (_, value) => value;
+
+const primitives = value => (
+  value instanceof Primitive ? Primitive(value) : value
+);
+
+const Primitives = (_, value) => (
+  typeof value === primitive ? new Primitive(value) : value
+);
+
+const revive = (input, parsed, output, $) => {
+  const lazy = [];
+  for (let ke = keys(output), {length} = ke, y = 0; y < length; y++) {
+    const k = ke[y];
+    const value = output[k];
+    if (value instanceof Primitive) {
+      const tmp = input[value];
+      if (typeof tmp === object && !parsed.has(tmp)) {
+        parsed.add(tmp);
+        output[k] = ignore;
+        lazy.push({k, a: [input, parsed, tmp, $]});
+      }
+      else
+        output[k] = $.call(output, k, tmp);
+    }
+    else if (output[k] !== ignore)
+      output[k] = $.call(output, k, value);
+  }
+  for (let {length} = lazy, i = 0; i < length; i++) {
+    const {k, a} = lazy[i];
+    output[k] = $.call(output, k, revive.apply(null, a));
+  }
+  return output;
+};
+
+const set = (known, input, value) => {
+  const index = Primitive(input.push(value) - 1);
+  known.set(value, index);
+  return index;
+};
+
+const parse = (text, reviver) => {
+  const input = $parse(text, Primitives).map(primitives);
+  const value = input[0];
+  const $ = reviver || noop;
+  const tmp = typeof value === object && value ?
+              revive(input, new Set, value, $) :
+              value;
+  return $.call({'': tmp}, '', tmp);
+};
+exports.parse = parse;
+
+const stringify = (value, replacer, space) => {
+  const $ = replacer && typeof replacer === object ?
+            (k, v) => (k === '' || -1 < replacer.indexOf(k) ? v : void 0) :
+            (replacer || noop);
+  const known = new Map;
+  const input = [];
+  const output = [];
+  let i = +set(known, input, $.call({'': value}, '', value));
+  let firstRun = !i;
+  while (i < input.length) {
+    firstRun = true;
+    output[i] = $stringify(input[i++], replace, space);
+  }
+  return '[' + output.join(',') + ']';
+  function replace(key, value) {
+    if (firstRun) {
+      firstRun = !firstRun;
+      return value;
+    }
+    const after = $.call(this, key, value);
+    switch (typeof after) {
+      case object:
+        if (after === null) return after;
+      case primitive:
+        return known.get(after) || set(known, input, after);
+    }
+    return after;
+  }
+};
+exports.stringify = stringify;
+
+const toJSON = any => $parse(stringify(any));
+exports.toJSON = toJSON;
+const fromJSON = any => parse($stringify(any));
+exports.fromJSON = fromJSON;
+
+},{}],"components/AddTransaction.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -50242,14 +50343,68 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
-var _react = _interopRequireDefault(require("react"));
+var _react = _interopRequireWildcard(require("react"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 
-function AddTransaction() {
+function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+const {
+  parse,
+  stringify
+} = require('flatted/cjs');
+
+function AddTransaction(_ref) {
+  let {
+    setShowAddTransaction,
+    setShowTransactionList
+  } = _ref;
+
+  const [showFormError, setShowFormError] = _react.default.useState(false);
+
+  const [waitingResponse, setWaitingResponse] = _react.default.useState(false);
+
+  const addTransactionFunc = async event => {
+    setWaitingResponse(true);
+    event.preventDefault();
+    const {
+      description,
+      amount,
+      type,
+      dateTime
+    } = event.target.elements;
+
+    if (!description || !amount || !dateTime || !type) {
+      setShowFormError(true);
+      return;
+    }
+
+    const transaction = {
+      description: description.value,
+      amount: amount.value,
+      type: type.value,
+      dateTime: dateTime.value
+    };
+
+    try {
+      await window.contract.addTransaction(transaction);
+    } catch (e) {
+      console.error(e);
+    }
+
+    document.querySelector("#description").value = "";
+    document.querySelector("#amount").value = "";
+    document.querySelector("#type").value = "Expense";
+    document.querySelector("#dateTime").value = "";
+    setWaitingResponse(false);
+    setShowAddTransaction(false);
+    setShowTransactionList(true);
+  };
+
   return /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null, /*#__PURE__*/_react.default.createElement("div", {
     className: "w-full flex flex-col items-center"
-  }, /*#__PURE__*/_react.default.createElement("div", {
+  }, /*#__PURE__*/_react.default.createElement("form", {
+    onSubmit: addTransactionFunc,
     className: "w-1/3 mb-8 flex flex-col gap-4"
   }, /*#__PURE__*/_react.default.createElement("div", {
     className: "w-full"
@@ -50311,29 +50466,22 @@ function AddTransaction() {
     required: true
   })), /*#__PURE__*/_react.default.createElement("div", {
     className: "w-full text-center"
-  }, /*#__PURE__*/_react.default.createElement("span", {
-    className: "text-red-800 font-bold",
-    "data-behavior": "form-error"
-  })), /*#__PURE__*/_react.default.createElement("div", {
+  }, showFormError && /*#__PURE__*/_react.default.createElement("span", {
+    className: "text-red-800 font-bold"
+  }, "Please enter all fields")), /*#__PURE__*/_react.default.createElement("div", {
     className: "w-full flex justify-center"
-  }, /*#__PURE__*/_react.default.createElement("button", {
-    type: "button",
+  }, /*#__PURE__*/_react.default.createElement("input", {
+    type: "submit",
     id: "add-transaction",
-    className: "text-white bg-[#050708] hover:bg-[#050708]/90 focus:ring-4 focus:outline-none focus:ring-[#050708]/50 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:focus:ring-[#050708]/50 dark:hover:bg-[#050708]/30 mr-2 mb-2 h-12"
-  }, "+ Add"), /*#__PURE__*/_react.default.createElement("button", {
-    type: "button",
-    id: "waitingButton",
-    style: {
-      display: "none"
-    },
-    className: "text-white hover:text-black bg-gray-700 hover:bg-gray-400 focus:ring-4 focus:outline-none focus:ring-[#050708]/50 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:focus:ring-[#050708]/50 dark:hover:bg-[#050708]/30 mr-2 mb-2 h-12",
-    disabled: true
-  }, "Adding.....")))));
+    className: "text-white bg-[#050708] hover:bg-[#050708]/90 focus:ring-4 focus:outline-none focus:ring-[#050708]/50 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:focus:ring-[#050708]/50 dark:hover:bg-[#050708]/30 mr-2 mb-2 h-12",
+    disabled: waitingResponse,
+    value: waitingResponse ? "Adding..." : "+Add"
+  })))));
 }
 
 var _default = AddTransaction;
 exports.default = _default;
-},{"react":"../node_modules/react/index.js"}],"components/TransactionList.js":[function(require,module,exports) {
+},{"react":"../node_modules/react/index.js","flatted/cjs":"../node_modules/flatted/cjs/index.js"}],"components/TransactionList.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -50352,6 +50500,8 @@ function TransactionList() {
 
   const [allTransactions, setAllTransactions] = _react.default.useState([]);
 
+  const [loading, setLoading] = _react.default.useState(true);
+
   (0, _react.useEffect)(() => {
     async function getTransactions() {
       const transList = await contract.getTransactions({
@@ -50369,6 +50519,7 @@ function TransactionList() {
 
         setAllTransactions(transList);
         setCurrentAmount(currentAmount);
+        setLoading(false);
       });
     }
 
@@ -50379,7 +50530,13 @@ function TransactionList() {
     "data-behavior": "viewSection"
   }, /*#__PURE__*/_react.default.createElement("h5", {
     className: "text-2xl"
-  }, "Current Amount: ", currentAmount), /*#__PURE__*/_react.default.createElement("table", {
+  }, "Current Amount: ", loading ? /*#__PURE__*/_react.default.createElement("span", {
+    className: "text-gray-500"
+  }, "Fetching....") : currentAmount), loading ? /*#__PURE__*/_react.default.createElement("div", {
+    className: "w-full flex flex-col items-center gap-4"
+  }, /*#__PURE__*/_react.default.createElement("h5", {
+    className: "text-2xl"
+  }, "Loading...")) : /*#__PURE__*/_react.default.createElement("table", {
     className: "bg-black text-white overflow-y-auto w-2/3"
   }, /*#__PURE__*/_react.default.createElement("thead", {
     className: "border-b border-white text-center"
@@ -50419,7 +50576,7 @@ exports.default = App;
 
 require("regenerator-runtime/runtime");
 
-var _react = _interopRequireDefault(require("react"));
+var _react = _interopRequireWildcard(require("react"));
 
 require("./global.css");
 
@@ -50434,6 +50591,10 @@ var _AddTransaction = _interopRequireDefault(require("./components/AddTransactio
 var _TransactionList = _interopRequireDefault(require("./components/TransactionList"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
+
+function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
 const nearAPI = require("near-api-js");
 
@@ -50463,6 +50624,8 @@ function App() {
   const [showTransactionList, setShowTransactionList] = _react.default.useState(true);
 
   const [signedIn, setSignedIn] = _react.default.useState(window.walletConnection.isSignedIn());
+
+  (0, _react.useEffect)(() => {}, []);
 
   if (signedIn) {
     return /*#__PURE__*/_react.default.createElement("main", {
@@ -50506,7 +50669,10 @@ function App() {
         setShowTransactionList(true);
       },
       className: "text-white bg-[#050708] hover:bg-[#050708]/90 focus:ring-4 focus:outline-none focus:ring-[#050708]/50 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:focus:ring-[#050708]/50 dark:hover:bg-[#050708]/30 mr-2 mb-2 h-12"
-    }, "Cancel")), showAddTransaction && /*#__PURE__*/_react.default.createElement(_AddTransaction.default, null), showTransactionList && /*#__PURE__*/_react.default.createElement(_TransactionList.default, null)));
+    }, "Cancel")), showAddTransaction && /*#__PURE__*/_react.default.createElement(_AddTransaction.default, {
+      setShowAddTransaction: setShowAddTransaction,
+      setShowTransactionList: setShowTransactionList
+    }), showTransactionList && /*#__PURE__*/_react.default.createElement(_TransactionList.default, null)));
   } // if not signed in, return early with sign-in prompt
 
 
@@ -51004,7 +51170,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "65186" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "59416" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
