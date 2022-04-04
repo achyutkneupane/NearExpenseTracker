@@ -12,10 +12,10 @@ export class Contract {
   }
 
   getTransactions(user: string = Context.sender): Array<Transaction> | null {
-    let getTrans = new Array<Transaction>(transactions.length);
+    const getTrans: Array<Transaction> = [];
     for(let i=0;i<transactions.length;i++) {
       if(transactions[i].user == user) {
-        getTrans[i] = transactions[i];
+        getTrans.push(transactions[i]);
       }
     }
     return getTrans;
