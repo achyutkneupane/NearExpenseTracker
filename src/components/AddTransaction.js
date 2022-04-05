@@ -1,17 +1,21 @@
-import React, { useEffect } from "react";
-const {parse, stringify} = require('flatted/cjs');
+import React from "react";
 
 function AddTransaction({setShowAddTransaction,setShowTransactionList}) {
   const [showFormError, setShowFormError] = React.useState(false);
   const [waitingResponse, setWaitingResponse] = React.useState(false);
 
+  function dateTimeValue(date, time) {
+    const returnDateTime = new Date(`${date} ${time}`).getTime();
+    return returnDateTime.toString();
+  }
+
   const addTransactionFunc = async (event) => {
     setWaitingResponse(true);
     event.preventDefault();
 
-    const { description, amount, type, dateTime } = event.target.elements;
+    const { description, amount, type, date, time } = event.target.elements;
 
-    if (!description || !amount || !dateTime || !type) {
+    if (!description || !amount || !date || !time || !type) {
       setShowFormError(true);
       return;
     }
@@ -19,7 +23,7 @@ function AddTransaction({setShowAddTransaction,setShowTransactionList}) {
       description: description.value,
       amount: amount.value,
       type: type.value,
-      dateTime: dateTime.value,
+      dateTime: dateTimeValue(date.value, time.value),
     };
     try {
       await window.contract.addTransaction(transaction);
@@ -30,7 +34,8 @@ function AddTransaction({setShowAddTransaction,setShowTransactionList}) {
     document.querySelector("#description").value = "";
     document.querySelector("#amount").value = "";
     document.querySelector("#type").value = "Expense";
-    document.querySelector("#dateTime").value = "";
+    document.querySelector("#date").value = "";
+    document.querySelector("#time").value = "";
     
     setWaitingResponse(false);
     setShowAddTransaction(false);
@@ -40,9 +45,9 @@ function AddTransaction({setShowAddTransaction,setShowTransactionList}) {
   return (
     <>
       <div
-        className="w-full flex flex-col items-center"
+        className="flex flex-col items-center w-full"
       >
-        <form onSubmit={addTransactionFunc} className="w-1/3 mb-8 flex flex-col gap-4">
+        <form onSubmit={addTransactionFunc} className="flex flex-col w-1/3 gap-4 mb-8">
           <div className="w-full">
             <label
               htmlFor="date"
@@ -51,7 +56,7 @@ function AddTransaction({setShowAddTransaction,setShowTransactionList}) {
               Date
             </label>
             <div className="relative">
-              <div className="flex absolute inset-y-0 left-0 items-center pl-3 pointer-events-none">
+              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                 <svg
                   className="w-5 h-5 text-gray-500 dark:text-gray-400"
                   fill="currentColor"
@@ -67,12 +72,47 @@ function AddTransaction({setShowAddTransaction,setShowTransactionList}) {
               </div>
               <input
                 type="text"
-                id="dateTime"
+                id="date"
                 className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 pl-10"
                 placeholder="Enter Date"
                 required
               />
             </div>
+              <span className={"text-gray-400 text-sm"}>
+                In format: YYYY-MM-DD
+              </span>
+          </div>
+          <div className="w-full">
+            <label
+              htmlFor="time"
+              className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+            >
+              Time
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                <svg
+                  className="w-5 h-5 text-gray-500 dark:text-gray-400"
+                  fillRule={"evenodd"}
+                  clipRule={'evenodd'}
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path d="M12 0c6.623 0 12 5.377 12 12s-5.377 12-12 12-12-5.377-12-12 5.377-12 12-12zm0 1c6.071 0 11 4.929 11 11s-4.929 11-11 11-11-4.929-11-11 4.929-11 11-11zm0 11h6v1h-7v-9h1v8z"/>
+                </svg>
+              </div>
+              <input
+                type="text"
+                id="time"
+                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 pl-10"
+                placeholder="Enter Time"
+                required
+              />
+            </div>
+            
+            <span className={"text-gray-400 text-sm"}>
+                In format: HH:MM:SS
+              </span>
           </div>
           <div className="w-full">
             <label
@@ -130,15 +170,15 @@ function AddTransaction({setShowAddTransaction,setShowTransactionList}) {
           <div className="w-full text-center">
             {showFormError && (
               <span
-                className="text-red-800 font-bold"
+                className="font-bold text-red-800"
               >Please enter all fields</span>
             )}
           </div>
-          <div className="w-full flex justify-center">
+          <div className="flex justify-center w-full">
             <input
               type="submit"
               id="add-transaction"
-              className="text-white bg-[#050708] hover:bg-[#050708]/90 focus:ring-4 focus:outline-none focus:ring-[#050708]/50 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:focus:ring-[#050708]/50 dark:hover:bg-[#050708]/30 mr-2 mb-2 h-12"
+              className="text-white bg-[#050708] hover:bg-[#050708]/90 focus:ring-4 focus:outline-none focus:ring-[#050708]/50 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:focus:ring-[#050708]/50 dark:hover:bg-[#050708]/30 mr-2 mb-2 h-12 cursor-pointer"
               disabled={waitingResponse}
               value={waitingResponse ? "Adding..." : "+Add"}
             />
