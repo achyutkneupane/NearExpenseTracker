@@ -46849,7 +46849,7 @@ module.hot.accept(reloadCSS);
 },{"_css_loader":"../node_modules/parcel-bundler/src/builtins/css-loader.js"}],"assets/logo-white.svg":[function(require,module,exports) {
 module.exports = "/logo-white.7fec831f.svg";
 },{}],"config.js":[function(require,module,exports) {
-const CONTRACT_NAME = "dev-1649179503701-47267355211165" || 'nearexpensetracker.achyut.testnet';
+const CONTRACT_NAME = "dev-1649254135334-81699431508024" || 'nearexpensetracker.achyut.testnet';
 
 function getConfig(env) {
   switch (env) {
@@ -52683,7 +52683,7 @@ function AddTransaction(_ref) {
   const [waitingResponse, setWaitingResponse] = _react.default.useState(false);
 
   function dateTimeValue(date, time) {
-    const returnDateTime = new Date(`${date} ${time}`).getTime();
+    const returnDateTime = (0, _moment.default)(`${date} ${time}`, "YYYY-MM-DDThh:mm:ss A").format("X");
     return returnDateTime.toString();
   }
 
@@ -52754,7 +52754,7 @@ function AddTransaction(_ref) {
     id: "date",
     className: "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 pl-10",
     placeholder: "Enter Date",
-    value: (0, _moment.default)().format("YYYY-MM-DD"),
+    defaultValue: (0, _moment.default)().format("YYYY-MM-DD"),
     required: true
   })), /*#__PURE__*/_react.default.createElement("span", {
     className: "text-gray-400 text-sm"
@@ -52780,7 +52780,7 @@ function AddTransaction(_ref) {
     id: "time",
     className: "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 pl-10",
     placeholder: "Enter Time",
-    value: (0, _moment.default)().format("hh:mm:ss A"),
+    defaultValue: (0, _moment.default)().format("hh:mm:ss A"),
     required: true
   })), /*#__PURE__*/_react.default.createElement("span", {
     className: "text-gray-400 text-sm"
@@ -54367,7 +54367,7 @@ function TransactionList() {
       });
       let currentAmount = 0;
       if (transList.length == 0) setLoading(false);
-      let sortedTrans = transList.sort((a, b) => a.dateTime - b.dateTime);
+      let sortedTrans = transList.sort((a, b) => b.dateTime - a.dateTime);
       transList.forEach(transaction => {
         if (transaction.type === "Expense") {
           currentAmount -= ~~transaction.amount;
@@ -54432,10 +54432,10 @@ function TransactionList() {
     }, /*#__PURE__*/_react.default.createElement(_reactSuperResponsiveTable.Td, {
       scope: "row",
       className: "px-6 py-4 font-medium text-gray-900 dark:text-white whitespace-nowrap"
-    }, moment(dateTime * 1).format("YYYY-MM-DD")), /*#__PURE__*/_react.default.createElement(_reactSuperResponsiveTable.Td, {
+    }, moment(dateTime * 1, "X").format("YYYY-MM-DD")), /*#__PURE__*/_react.default.createElement(_reactSuperResponsiveTable.Td, {
       scope: "row",
       className: "px-6 py-4 font-medium text-gray-900 dark:text-white whitespace-nowrap"
-    }, moment(dateTime * 1).format("hh:mm:ss A")), /*#__PURE__*/_react.default.createElement(_reactSuperResponsiveTable.Td, {
+    }, moment(dateTime * 1, "X").format("hh:mm:ss A")), /*#__PURE__*/_react.default.createElement(_reactSuperResponsiveTable.Td, {
       className: "px-6 py-4"
     }, description), /*#__PURE__*/_react.default.createElement(_reactSuperResponsiveTable.Td, {
       className: "px-6 py-4"
@@ -54514,14 +54514,14 @@ function App() {
     }, /*#__PURE__*/_react.default.createElement("div", {
       className: "pt-24 pb-8 text-center"
     }, /*#__PURE__*/_react.default.createElement("h1", {
-      className: "text-4xl mb-4"
+      className: "mb-4 text-4xl"
     }, "Transactions for ", /*#__PURE__*/_react.default.createElement("span", {
-      className: "font-bolder text-blue-900"
+      className: "text-blue-900 font-bolder"
     }, /*#__PURE__*/_react.default.createElement("a", {
       href: "https://explorer.testnet.near.org/accounts/" + window.accountId,
       target: "_blank"
     }, window.accountId))), /*#__PURE__*/_react.default.createElement("div", {
-      className: "flex gap-2 justify-center items-center"
+      className: "flex items-center justify-center gap-2"
     }, /*#__PURE__*/_react.default.createElement("button", {
       id: "sign-out-button",
       type: "button",
@@ -54559,13 +54559,13 @@ function App() {
 
   if (!signedIn) {
     return /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null, /*#__PURE__*/_react.default.createElement("main", {
-      className: "w-screen h-screen flex flex-col justify-center items-center "
+      className: "flex flex-col items-center justify-center w-screen h-screen "
     }, /*#__PURE__*/_react.default.createElement("div", {
       className: "text-center"
     }, /*#__PURE__*/_react.default.createElement("h1", {
-      className: "text-4xl mb-4"
+      className: "mb-4 text-4xl"
     }, "NEAR Expense Tracker"), /*#__PURE__*/_react.default.createElement("div", {
-      className: "flex gap-2 justify-center items-center"
+      className: "flex items-center justify-center gap-2"
     }, /*#__PURE__*/_react.default.createElement("button", {
       id: "sign-in-button",
       type: "button",
@@ -54582,7 +54582,24 @@ function App() {
     }), "Sign in with NEAR")))));
   }
 
-  return /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null);
+  return /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null, /*#__PURE__*/_react.default.createElement("div", {
+    class: "flex justify-center -mt-16 gap-8"
+  }, /*#__PURE__*/_react.default.createElement("div", null, /*#__PURE__*/_react.default.createElement("a", {
+    class: "github-button",
+    href: "https://github.com/achyutkneupane",
+    "data-color-scheme": "no-preference: dark; light: light; dark: dark;",
+    "data-size": "large",
+    "data-show-count": "true",
+    "aria-label": "Follow @achyutkneupane on GitHub"
+  }, "Follow @achyutkneupane")), /*#__PURE__*/_react.default.createElement("div", null, /*#__PURE__*/_react.default.createElement("a", {
+    class: "github-button",
+    href: "https://github.com/achyutkneupane/NearExpenseTracker",
+    "data-color-scheme": "no-preference: dark; light: light; dark: dark;",
+    "data-icon": "octicon-star",
+    "data-size": "large",
+    "data-show-count": "true",
+    "aria-label": "Star achyutkneupane/NearExpenseTracker on GitHub"
+  }, "Star"))));
 }
 },{"regenerator-runtime/runtime":"../node_modules/regenerator-runtime/runtime.js","near-api-js":"../node_modules/near-api-js/lib/browser-index.js","react":"../node_modules/react/index.js","./global.css":"global.css","./assets/logo-white.svg":"assets/logo-white.svg","./config":"config.js","./utils":"utils.js","./components/AddTransaction":"components/AddTransaction.js","./components/TransactionList":"components/TransactionList.js"}],"index.js":[function(require,module,exports) {
 "use strict";
@@ -54634,7 +54651,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "62202" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "61627" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
