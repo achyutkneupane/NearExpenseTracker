@@ -37,12 +37,12 @@ export default function App() {
     return (
       <main className="w-screen h-screen">
         <div className="pt-24 pb-8 text-center">
-          <h1 className="text-4xl mb-4">
-            Transactions for <span className="font-bolder text-blue-900">
+          <h1 className="mb-4 text-4xl">
+            Transactions for <span className="text-blue-900 font-bolder">
               <a href={"https://explorer.testnet.near.org/accounts/"+window.accountId}  target="_blank">{window.accountId}</a>
             </span>
           </h1>
-          <div className="flex gap-2 justify-center items-center">
+          <div className="flex items-center justify-center gap-2">
             <button
               id="sign-out-button"
               type="button"
@@ -88,10 +88,10 @@ export default function App() {
   if (!signedIn) {
     return (
       <>
-        <main className="w-screen h-screen flex flex-col justify-center items-center ">
+        <main className="flex flex-col items-center justify-center w-screen h-screen ">
           <div className="text-center">
-            <h1 className="text-4xl mb-4">NEAR Expense Tracker</h1>
-            <div className="flex gap-2 justify-center items-center">
+            <h1 className="mb-4 text-4xl">NEAR Expense Tracker</h1>
+            <div className="flex items-center justify-center gap-2">
               <button
                 id="sign-in-button"
                 type="button"
@@ -113,5 +113,15 @@ export default function App() {
     );
   }
 
-  return <></>;
+  return <>
+  
+    <div class="flex justify-center -mt-16 gap-8">
+        <div>
+            <a class="github-button" href="https://github.com/achyutkneupane" data-color-scheme="no-preference: dark; light: light; dark: dark;" data-size="large" data-show-count="true" aria-label="Follow @achyutkneupane on GitHub">Follow @achyutkneupane</a>
+        </div>
+        <div>
+            <a class="github-button" href="https://github.com/achyutkneupane/NearExpenseTracker" data-color-scheme="no-preference: dark; light: light; dark: dark;" data-icon="octicon-star" data-size="large" data-show-count="true" aria-label="Star achyutkneupane/NearExpenseTracker on GitHub">Star</a>
+        </div>
+    </div>
+    </>;
 }

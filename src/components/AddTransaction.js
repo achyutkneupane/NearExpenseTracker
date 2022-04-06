@@ -1,3 +1,4 @@
+import moment from "moment";
 import React from "react";
 
 function AddTransaction({setShowAddTransaction,setShowTransactionList}) {
@@ -5,7 +6,7 @@ function AddTransaction({setShowAddTransaction,setShowTransactionList}) {
   const [waitingResponse, setWaitingResponse] = React.useState(false);
 
   function dateTimeValue(date, time) {
-    const returnDateTime = new Date(`${date} ${time}`).getTime();
+    const returnDateTime = moment(`${date} ${time}`, "YYYY-MM-DDThh:mm:ss A").format("x");
     return returnDateTime.toString();
   }
 
@@ -75,6 +76,7 @@ function AddTransaction({setShowAddTransaction,setShowTransactionList}) {
                 id="date"
                 className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 pl-10"
                 placeholder="Enter Date"
+                defaultValue={moment().format("YYYY-MM-DD")}
                 required
               />
             </div>
@@ -106,12 +108,13 @@ function AddTransaction({setShowAddTransaction,setShowTransactionList}) {
                 id="time"
                 className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 pl-10"
                 placeholder="Enter Time"
+                defaultValue={moment().format("hh:mm:ss A")}
                 required
               />
             </div>
             
             <span className={"text-gray-400 text-sm"}>
-                In format: HH:MM:SS
+                In format: HH:MM:SS AM/PM
               </span>
           </div>
           <div className="w-full">

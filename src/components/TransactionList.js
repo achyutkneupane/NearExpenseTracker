@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { Table, Thead, Tbody, Tr, Th, Td } from "react-super-responsive-table";
 import "react-super-responsive-table/dist/SuperResponsiveTableStyle.css";
+var moment = require('moment');
 
 function TransactionList() {
   const [currentAmount, setCurrentAmount] = React.useState(0);
@@ -14,7 +15,7 @@ function TransactionList() {
       });
       let currentAmount = 0;
       if (transList.length == 0) setLoading(false);
-      transList &&
+        let sortedTrans = transList.sort((a, b) => a.dateTime - b.dateTime);
         transList.forEach((transaction) => {
           if (transaction.type === "Expense") {
             currentAmount -= ~~transaction.amount;
@@ -23,7 +24,7 @@ function TransactionList() {
           } else {
             currentAmount;
           }
-          setAllTransactions(transList);
+          setAllTransactions(sortedTrans);
           setCurrentAmount(currentAmount);
           setLoading(false);
         });
@@ -58,6 +59,9 @@ function TransactionList() {
                     Date
                   </Th>
                   <Th scope="col" className="px-6 py-3">
+                    Time
+                  </Th>
+                  <Th scope="col" className="px-6 py-3">
                     Description
                   </Th>
                   <Th scope="col" className="px-6 py-3">
@@ -84,7 +88,13 @@ function TransactionList() {
                           scope="row"
                           className="px-6 py-4 font-medium text-gray-900 dark:text-white whitespace-nowrap"
                         >
-                          {dateTime}
+                          {moment(dateTime*1).format("YYYY-MM-DD")}
+                        </Td>
+                        <Td
+                          scope="row"
+                          className="px-6 py-4 font-medium text-gray-900 dark:text-white whitespace-nowrap"
+                        >
+                          {moment(dateTime*1).format("hh:mm:ss A")}
                         </Td>
                         <Td className="px-6 py-4">{description}</Td>
                         <Td className="px-6 py-4">{amount}</Td>
